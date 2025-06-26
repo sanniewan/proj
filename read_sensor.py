@@ -14,13 +14,14 @@ def main():
         for sensor in sensor_objects:
             try:
                 sensor.write("R")
-                time.sleep(2)
+                time.sleep(PROCESSING_DELAY)
                 reading = sensor.read()
                 device_info = sensor.get_device_info()
                 print(f"Sensor 0x{sensor.address:02X} ({device_info}): {reading}")
             except Exception as e:
                 print(f"Error reading sensor {sensor.get_device_info()}: {e}")
-        time.sleep(1)
+            time.sleep(3)
+        time.sleep(2)
 
 if __name__ == "__main__":
     main()
