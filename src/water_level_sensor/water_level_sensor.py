@@ -8,17 +8,17 @@ class AgrowtekWaterLevelSensor:
     Agrowtek water level sensor module.
     This module reads the water level sensor with a digital i/o pin.
     """
-    DEFAULT_SENSOR_PIN = 17 # IO17 pin on rpi
 
-    def __init__(self, pin: int = DEFAULT_SENSOR_PIN) -> None:
-        """Initializes sensor with default pin number.
+    def __init__(self, pin: int) -> None:
+        """Initializes sensor with specified pin number.
 
         Args:
             pin (int): The I/O pin number of the optical level sensor.
         """
+        self._sensor_name = "Agrowtek Water Level Sensor"
         self._pin = pin
-        self._sensor_configured = False
         self._sensor = None
+        self._sensor_configured = False
         self.error, self.message = self._configure_sensor()
 
     def _configure_sensor(self) -> tuple[bool, str]:
