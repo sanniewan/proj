@@ -4,7 +4,7 @@ from typing import Tuple
 
 import board
 from busio import I2C
-from adafruit_circuitpython_ahtx0 import AHTx0
+from adafruit_ahtx0 import AHTx0
 
 
 class DHT20Sensor:
