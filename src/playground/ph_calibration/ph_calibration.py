@@ -162,6 +162,7 @@ class AtlasEzoPhSensor:
             return True, err_msg, "0"
 
         return False, "", cal_status
+        
     def check_calibration_status(self) -> tuple[bool, str, str]:
         """Checks the calibration status of the pH probe
         
