@@ -110,13 +110,17 @@ class AtlasEzoPhSensor:
 
         return False, "", ph_value
 
-    def calibrate(self, command: str, pH: float) -> tuple[bool, str, str]:
+    def calibrate(self, command: str, pH: float=7.00) -> tuple[bool, str, str]:
         """Calibrates the pH at the pH value and scale specified
         
         Args:
             pH (float): current pH for the device to be calibrated against
             command (str): mid, low, high, clear; mid, low and high specify rank of current pH
-        
+                Cal,mid,n - single point calibration at midpoint
+                Cal,low,n - two point calibration at lowpoint
+                Cal,high,n - three point calibration at highpoint
+                Cal,clear - delete calibration data
+
         Returns:
             Tuple[bool, str, str]: A tuple containing:
                 - error flag: True if an error occurred, False otherwise.
@@ -135,8 +139,17 @@ class AtlasEzoPhSensor:
         
         try: 
             # Send calibration command        ISSUING THE "Cal,mid" COMMAND WILL CLEAR ALL OTHER CALIBRATION POINTS.
-            # self._sensor.write(f"Cal,{command},{pH}")
-            time.sleep(self.PROCESSING_DELAY)
+            if (command == "mid" or command == "low" or command == "high"):
+                self._sensor.write(f"Cal,{command},{pH}")
+                time.sleep(self.PROCESSING_DELAY)
+            # Delete calibration data
+            elif (command == "clear"):
+                self._sensor.write(f"Cal,{command}")
+                time.sleep(self.PROCESSING_DELAY_CAL)
+            # Command given is not valid
+            else:
+                err_msg = f"Command is not valid: input \"mid, low, high, or clear\". at {self._sensor_name} ({hex(self._address)})"
+                return True, err_msg, "0"
 
             # Check status of calibration
             self._sensor.write("Cal,?")
@@ -149,6 +162,38 @@ class AtlasEzoPhSensor:
             return True, err_msg, "0"
 
         return False, "", cal_status
+    def check_calibration_status(self) -> tuple[bool, str, str]:
+        """Checks the calibration status of the pH probe
+        
+        Returns:
+            Tuple[bool, str, str]: A tuple containing:
+                - error flag: True if an error occurred, False otherwise.
+                - error message: Description of the error, empty if no error.
+                - calibration level: ?CAL,0 or ?CAL,1 or ?CAL,2 or ?CAL,3 calibration
+                    where 0 is uncalibrated and three point is fully calibrated
+        """
+        err, msg = self._check_i2c_and_sensor()
+        if err:
+            return True, msg, ""
+
+        if not self._sensor_configured:
+            err, msg = self._configure_sensor()
+            if err:
+                return True, msg, ""
+        
+        try: 
+            # Check status of calibration
+            self._sensor.write("Cal,?")
+            time.sleep(self.PROCESSING_DELAY_CAL)
+
+            # Read response back
+            cal_status = str(self._sensor.read())
+        except Exception as e:
+            err_msg = f"Error reading {self._sensor_name} ({hex(self._address)}): {e}"
+            return True, err_msg, "0"
+
+        return False, "", cal_status
+
 
 
 def main() -> None:
@@ -171,8 +216,15 @@ def main() -> None:
             print(f"Error: {message1}")
         else:
             print(f"cal level: {cal_status}")
+
+        # Print calibration status of pH probe
+        err2, message2, cal_status2 = sensor.check_calibration_status()  # CHANGE THIS
+        if err2:
+            print(f"Error: {message2}")
+        else:
+            print(f"cal level: {cal_status2}")
         
-        time.sleep(5)
+        time.sleep(3)
 
 
 if __name__ == '__main__':
