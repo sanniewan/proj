@@ -1,4 +1,4 @@
-from mcp23017_boards.high_power_board import MCP23017_RelayBoard
+from modules.mcp23017_boards.high_power_board import MCP23017_RelayBoard
 import time
 
 def main():

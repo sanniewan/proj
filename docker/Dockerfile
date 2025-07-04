@@ -53,4 +53,21 @@ WORKDIR /workspace/proj
 # Copy your project into the container
 COPY . .
 
+# Install the local package
+RUN pip3 install -e .
+
 CMD ["/bin/bash"]
+
+# FROM arm64v8/ros:humble-ros-base-jammy
+
+# # Optional, if using build backend
+# RUN pip3 install --upgrade pip setuptools && \
+#     pip3 install -e .
+
+# # Install your project + dependencies
+# COPY . /workspace/proj
+
+# # Set working directory to your project
+# WORKDIR /workspace/proj
+
+# CMD ["/bin/bash"]

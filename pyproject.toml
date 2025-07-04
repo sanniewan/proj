@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proj"
+version = "0.1"
+description = "Hydroponics control system"
+authors = [{ name = "Sannie Wan" }]
+dependencies = [
+    "adafruit-circuitpython-ds3502",
+    "adafruit-circuitpython-pcf8575",
+    "adafruit-circuitpython-scd30",
+    "adafruit-circuitpython-ahtx0",
+    "adafruit-circuitpython-scd4x",
+    "pyniryo",
+    "adafruit-blinka",
+    "RPi.GPIO",
+    "adafruit-circuitpython-mcp230xx"
+]

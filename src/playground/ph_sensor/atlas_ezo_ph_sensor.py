@@ -1,7 +1,7 @@
 import time
 import board
 from busio import I2C
-from atlas import AtlasI2C
+from modules.atlas import AtlasI2C
 
 
 class AtlasEzoPhSensor:
