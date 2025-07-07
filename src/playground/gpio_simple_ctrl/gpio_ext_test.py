@@ -22,6 +22,9 @@ def main() -> tuple[int, int]:
     else:
         print(f"Passed {passed} tests and failed {failed} tests.")
 
+    # Turn all ports off
+    err_end, msg_end = board._write_gpio(0x0000)
+
 def test_port_combinations(board, ports_to_test: int) -> tuple[bool, int, int]:
     total_tests = 0
     passed = 0
@@ -58,7 +61,7 @@ def test_port_combinations(board, ports_to_test: int) -> tuple[bool, int, int]:
 
         print(f"Written:  {format(bits_to_write, '016b')} "
               f"Read: {format(masked_status, '016b')} "
-              f"{'✅ PASS' if match else '❌ FAIL'}")
+              f"{'PASS 🤩' if match else 'FAIL 💔'}")
 
         total_tests += 1
 
