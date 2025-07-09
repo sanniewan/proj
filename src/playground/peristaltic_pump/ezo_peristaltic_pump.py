@@ -3,6 +3,7 @@
 
 import argparse
 import logging
+import time
 from typing import Tuple
 
 from busio import I2C
@@ -19,6 +20,7 @@ class PeristalticPumpI2cAddressChanger:
         self._device = None
         self._name = "Peristaltic Pump"    ## CHANGED THE NAME FROM PARISTATIC
         self._detected_i2c_devices = []
+        self.error = self._configure_device()
 
     def change_i2c_address(self, new_i2c_address: int) -> None:
         """Change the I2C address of the device.
@@ -92,7 +94,7 @@ class PeristalticPumpI2cAddressChanger:
             logging.error(f'Peristaltic pump (0x{self._i2c_address:x}): changing address to 0x{new_address:x} failed: {e}')
             return False
         return True
-    def _dispense_volume(self, volume: float=0) -> tuple[bool,str]:
+    def dispense_volume(self, volume: float=0) -> tuple[bool,str]:
         """Dispense specified volume.
 
         Args:
@@ -101,10 +103,10 @@ class PeristalticPumpI2cAddressChanger:
             bool: error flag - True if an error occured, False otherwise.
             str: dispense status ?D,-40.50,0
         """
-        err = self._detect_i2c_bus and self._detect_device
-        if err:
+        err_i2c = not (self._detect_i2c_bus() and self._detect_device())
+        if err_i2c:
             return True, "Peristaltic pump or I2C bus detection failed"
-        
+
         try:
             self._device.write(f"D,{volume}")
         except Exception as e:
@@ -131,34 +133,34 @@ def hex_int(value: str) -> int:
 def main() -> None:
 
     # Uncomment to test pump dispensing volume
-    # current_address = 0x68
-    # pump = PeristalticPumpI2cAddressChanger(current_address)
-    
-    # time.sleep(15)
-    # volume_to_disp = 15
-    # err, msg = pump._dispense_volume(volume_to_disp)
-    # if err:
-    #     print(f'Error at {pump._name} at address {pump._i2c_address}')
-    #     print(msg)
-    # else: 
-    #     print(f'Successfully pumped {volume_to_disp}')
-    
-    """Main function to parse arguments and set the I2C address."""
-    parser = argparse.ArgumentParser(description='Set Peristaltic Pump I2C Address')
-    parser.add_argument('-c', '--current', type=hex_int, required=True,
-                        help='Current I2C address of the peristaltic pump (hex, e.g., 0x67 or 67)')
-    parser.add_argument('-n', '--new', type=hex_int, required=True,
-                        help='New I2C address to set for the peristaltic pump (hex, e.g., 0x68 or 68)')
-    args = parser.parse_args()
-
-    current_address = args.current
-    new_address = args.new
-
+    current_address = 0x5b
     pump = PeristalticPumpI2cAddressChanger(current_address)
-    print(f'Change I2C address from 0x{current_address:x} to 0x{new_address:x}...')
-    pump.change_i2c_address(new_address)
-    print('Done.')
-    return None
+    time.sleep(1)
+    volume_to_disp = 15
+    err, msg = pump.dispense_volume(volume_to_disp)
+    if err:
+        print(f'Error at {pump._name} at address {pump._i2c_address}')
+        print(msg)
+    else: 
+        print(f'Successfully pumped {volume_to_disp}')
+    
+
+    """Main function to parse arguments and set the I2C address."""
+    # parser = argparse.ArgumentParser(description='Set Peristaltic Pump I2C Address')
+    # parser.add_argument('-c', '--current', type=hex_int, required=True,
+    #                     help='Current I2C address of the peristaltic pump (hex, e.g., 0x67 or 67)')
+    # parser.add_argument('-n', '--new', type=hex_int, required=True,
+    #                     help='New I2C address to set for the peristaltic pump (hex, e.g., 0x68 or 68)')
+    # args = parser.parse_args()
+
+    # current_address = args.current
+    # new_address = args.new
+
+    # pump = PeristalticPumpI2cAddressChanger(current_address)
+    # print(f'Change I2C address from 0x{current_address:x} to 0x{new_address:x}...')
+    # pump.change_i2c_address(new_address)
+    # print('Done.')
+    # return None
 
 
 if __name__ == "__main__":
