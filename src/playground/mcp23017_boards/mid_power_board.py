@@ -316,7 +316,7 @@ class MCP23017_GpioBoard:
 
 def main(args=None) -> None:
     """Main entry point for the script."""
-    board = MCP23017_GpioBoard(0x26)
+    board = MCP23017_GpioBoard(0x20)
     err, message = board.set_as_input(0)
     if err:
         print(f'Error setting port 0 as input: {message}')

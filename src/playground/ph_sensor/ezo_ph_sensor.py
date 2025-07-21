@@ -205,25 +205,35 @@ def main() -> None:
 
     while True:
         # Read pH value and print
+        print("Current pH reading from sensor:")
         err, message, ph_value = sensor.read(temperature)
         if err:
-            print(f"Error: {message}")
+            print(f"Error: {message}\n")
         else:
-            print(f"pH: {ph_value} @ {temperature}°C")
-
-        # Calibrate pH probe with known solutions and print status
-        err1, message1, cal_status = sensor.calibrate("dim",7)  # CHANGE THIS
-        if err1:
-            print(f"Error: {message1}")
-        else:
-            print(f"cal level: {cal_status}")
+            print(f"pH: {ph_value} @ {temperature}°C\n")
+        
+        print("Enter parameters for calibration solution your pH probe is currently submerged in:")
+        # Provide option for calibrating midpoint, lowpoint, or highpoint.
+        mid_low_hi = input("    Enter low , mid, or high to calibrate respective point:")
+        
+        # Enter the ph value of the calibration solution
+        ph_val_cal = input(f"    Enter the pH value of the {mid_low_hi}point solution:")
+        
+        print("Calibrating now:")
+        # Calibrate pH probe with user-entered parameters and print status
+        # err1, message1, cal_status = sensor.calibrate(mid_low_hi,ph_val_cal)
+        # if err1:
+        #     print(f"    Error: {message1}")
+        # else:
+        #     print(f"    Cal level: {cal_status}")
 
         # Print calibration status of pH probe
-        err2, message2, cal_status2 = sensor.check_calibration_status()  # CHANGE THIS
+        print("Calibration Status:")
+        err2, message2, cal_status2 = sensor.check_calibration_status()
         if err2:
-            print(f"Error: {message2}")
+            print(f"    Error: {message2}")
         else:
-            print(f"cal level: {cal_status2}")
+            print(f"    cal level: {cal_status2}")
         
         time.sleep(3)
 

@@ -1,6 +1,7 @@
 import board
 from busio import I2C
 from adafruit_mcp230xx.mcp23017 import MCP23017
+from time import sleep
 
 class MCP23017_RelayBoard:
     """MCP23017-based relay board.
@@ -34,11 +35,11 @@ class MCP23017_RelayBoard:
                 - (str) Error message or empty string
                 - (bool) Returns True if the relay is closed, False otherwise
         """
-        err, message = self._set_bit(port, True)
+        err, message = self._set_bit(port, False)
         if err:
             return True, f'Unable to execute close() relay at port {port}' + message
         
-        return False, '', True
+        return False, ''
 
     def open(self, port: int) -> tuple[bool, str]:
         """Open the relay at the specified port.
@@ -52,11 +53,11 @@ class MCP23017_RelayBoard:
                 - (str) Error message or empty string
                 - (bool) Returns True if the relay is closed, False otherwise
         """
-        err, message = self._set_bit(port, False)
+        err, message = self._set_bit(port, True)
         if err:
             return True, f'Unable to execute open() relay at port {port}' + message
         
-        return False, '', False
+        return False, ''
 
     def is_closed(self, port: int) -> tuple[bool, str, bool]:
         """Check if the relay at the specified port is closed.
@@ -182,3 +183,26 @@ class MCP23017_RelayBoard:
             return True, f'Unable to execute set_ports_as_output(): {str(e)}'
         
         return False, ''
+
+
+def main(args=None) -> None:
+    """Main entry point for the script."""
+    board = MCP23017_RelayBoard(0x26)
+    
+    sleep(1)
+    
+    while True:
+        for i in range(16):
+            err, msg = board.open(i)
+            if err:
+                print(msg)
+        sleep(5)
+        
+        # for port in range(16):
+        #     err, msg = board.close(port)
+        #     if err:
+        #         print(msg)
+        # sleep(5)
+        
+if __name__ == '__main__':
+    main()
