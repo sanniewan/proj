@@ -7,3 +7,4 @@ pyniryo
 adafruit-blinka
 RPi.GPIO
 adafruit-circuitpython-mcp230xx
+lgpio
