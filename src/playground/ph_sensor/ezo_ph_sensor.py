@@ -145,7 +145,7 @@ class AtlasEzoPhSensor:
             # Delete calibration data
             elif (command == "clear"):
                 self._sensor.write(f"Cal,{command}")
-                time.sleep(self.PROCESSING_DELAY_CAL)
+                time.sleep(self.PROCESSING_DELAY)
             # Command given is not valid
             else:
                 err_msg = f"Command is not valid: input \"mid, low, high, or clear\". at {self._sensor_name} ({hex(self._address)})"
@@ -205,22 +205,22 @@ def main() -> None:
 
     while True:
         # Read pH value and print
-        print("Current pH reading from sensor:")
         err, message, ph_value = sensor.read(temperature)
         if err:
             print(f"Error: {message}\n")
         else:
-            print(f"pH: {ph_value} @ {temperature}°C\n")
+            print(f"Current pH reading from sensor: pH: {ph_value} @ {temperature}°C\n")
         
         print("Enter parameters for calibration solution your pH probe is currently submerged in:")
-        # Provide option for calibrating midpoint, lowpoint, or highpoint.
-        mid_low_hi = input("    Enter low , mid, or high to calibrate respective point:")
         
-        # Enter the ph value of the calibration solution
-        ph_val_cal = input(f"    Enter the pH value of the {mid_low_hi}point solution:")
+        # # Provide option for calibrating midpoint, lowpoint, or highpoint.
+        # mid_low_hi = input("    Enter low , mid, or high to calibrate respective point:")
         
-        print("Calibrating now:")
-        # Calibrate pH probe with user-entered parameters and print status
+        # # Enter the ph value of the calibration solution
+        # ph_val_cal = input(f"    Enter the pH value of the {mid_low_hi}point solution:")
+        
+        # print("Calibrating now:")
+        # # Calibrate pH probe with user-entered parameters and print status
         # err1, message1, cal_status = sensor.calibrate(mid_low_hi,ph_val_cal)
         # if err1:
         #     print(f"    Error: {message1}")
@@ -235,7 +235,7 @@ def main() -> None:
         else:
             print(f"    cal level: {cal_status2}")
         
-        time.sleep(3)
+        time.sleep(1)
 
 
 if __name__ == '__main__':

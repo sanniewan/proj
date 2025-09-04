@@ -317,25 +317,15 @@ class MCP23017_GpioBoard:
 def main(args=None) -> None:
     """Main entry point for the script."""
     board = MCP23017_GpioBoard(0x20)
-    err, message = board.set_as_input(0)
-    if err:
-        print(f'Error setting port 0 as input: {message}')
-    else:
-        print('Port 0 set as input')
-        err, message, bit = board.read(0)
-        if err:
-            print(f'Error reading port 0: {message}')
-        else:
-            print(f'Port 0 value: {bit}')
-    
 
-    err, message = board.set_as_output(1)
+    err, message = board._set_all_ports_as_output()
+    
     if err:
         print(f'Error setting port 1 as output: {message}')
     else:
         print('Port 1 set as output')
     
-        err, message = board.write(1, 1)
+        err, message = board.write(1, 0)
         if err:
             print(f'Error writing to port 1: {message}')
         else:
@@ -347,18 +337,6 @@ def main(args=None) -> None:
         else:
             print(f'Port 1 is set to value: {bit}')
         
-        err, message = board.flip(1)
-        if err:
-            print(f'Error flipping port 1: {message}')
-        else:
-            print('Port 1 flipped')
-
-        err, message, bit = board.read(1)
-        if err:
-            print(f'Error reading port 1: {message}')
-        else:
-            print(f'Port 1 is set to value: {bit}')
-
 
 if __name__ == '__main__':
     main()
