@@ -195,16 +195,107 @@ class AtlasEzoPhSensor:
 
         return False, "", cal_status
 
+    def check_export(self) -> tuple[bool, str, str]:
+        """Checks how many strings to export
+        """
+        err, msg = self._check_i2c_and_sensor()
+        if err:
+            return True, msg, "0"
+
+        if not self._sensor_configured:
+            err, msg = self._configure_sensor()
+            if err:
+                return True, msg, "0"
+        
+        try: 
+            # Check status of calibration
+            self._sensor.write("Export,?")
+            time.sleep(self.PROCESSING_DELAY_CAL)
+
+            # Read response back
+            num_strings = str(self._sensor.read())
+        except Exception as e:
+            err_msg = f"Error checking export strings {self._sensor_name} ({hex(self._address)}): {e}"
+            return True, err_msg, "0"
+
+        return False, "", num_strings
+    
+    def export(self, raw_num_strings: str) -> tuple[bool, str, list[str]]:
+        """Exports strings
+        """
+        err, msg = self._check_i2c_and_sensor()
+        if err:
+            return True, msg, "0"
+
+        if not self._sensor_configured:
+            err, msg = self._configure_sensor()
+            if err:
+                return True, msg, "0"
+        
+        try:
+            # Split by commas
+            parts = raw_num_strings.split(",")
+
+            # Get the second value (index 1)
+            num_strings = int(parts[1])   # "6" -> 6
+            
+            export_strings = []
+            for i in range(num_strings):
+                # Check status of calibration
+                self._sensor.write("Export")
+                time.sleep(self.PROCESSING_DELAY_CAL)
+
+                # Read response back
+                export_string = str(self._sensor.read())
+                # print(f"Export string {i+1}: {export_string}")
+                
+                # Store export strings in a list
+                export_strings.append(export_string)
+            
+        except Exception as e:
+            err_msg = f"Error exporting strings {self._sensor_name} ({hex(self._address)}): {e}"
+            return True, err_msg, "0"
+
+        return False, "", export_strings
+    
+    def import_cal_string(self, import_strings: list[str]) -> tuple[bool, str, list[str]]:
+            """Exports strings
+            """
+            err, msg = self._check_i2c_and_sensor()
+            if err:
+                return True, msg, "0"
+
+            if not self._sensor_configured:
+                err, msg = self._configure_sensor()
+                if err:
+                    return True, msg, "0"
+            
+            try:
+                self._sensor.query(f"Import,{len(import_strings)+1}")
+                time.sleep(self.PROCESSING_DELAY)
+                
+                for s in import_strings:
+                    self._sensor.query(f"Import,{s}")
+                    print(f"Import,{s}")
+                    time.sleep(self.PROCESSING_DELAY_CAL)
+                    
+            except Exception as e:
+                err_msg = f"Error importing strings {self._sensor_name} ({hex(self._address)}): {e}"
+                return True, err_msg, "0"
+
+            return False, "", import_strings
 
 
 def main() -> None:
     """Main function to demonstrate the usage of the AtlasEzoPhSensor class."""
     address = 0x63  # I2C address of the pH sensor
-    temperature = 20.0  # Example temperature for compensation
+    temperature = 24.0  # Water temperature for compensation
     sensor = AtlasEzoPhSensor(address)
 
     while True:
         # Read pH value and print
+        time.sleep(1)
+        
         err, message, ph_value = sensor.read(temperature)
         if err:
             print(f"Error: {message}\n")
@@ -213,6 +304,15 @@ def main() -> None:
         
         print("Enter parameters for calibration solution your pH probe is currently submerged in:")
         
+        # Print calibration status of pH probe
+        print("Calibration Status:")
+        err2, message2, cal_status2 = sensor.check_calibration_status()
+        if err2:
+            print(f"    Error: {message2}")
+        else:
+            print(f"    cal level: {cal_status2}")
+        
+        ########## UNCOMMENT TO CALIBRATE ##########
         # # Provide option for calibrating midpoint, lowpoint, or highpoint.
         # mid_low_hi = input("    Enter low , mid, or high to calibrate respective point:")
         
@@ -227,16 +327,30 @@ def main() -> None:
         # else:
         #     print(f"    Cal level: {cal_status}")
 
-        # Print calibration status of pH probe
-        print("Calibration Status:")
-        err2, message2, cal_status2 = sensor.check_calibration_status()
-        if err2:
-            print(f"    Error: {message2}")
-        else:
-            print(f"    cal level: {cal_status2}")
         
-        time.sleep(1)
+        ########## UNCOMMENT TO EXPORT STRINGS ##########
+        # # Print number of strings to export
+        # print("Exporting data:")
+        # err3, msg3, num_strings = sensor.check_export()
+        # if err3:
+        #     print(f"    Error: {msg3}")
+        # else:
+        #     print(f"    Number of strings to export: {num_strings}")
+        
+        # # Export strings and print
+        # err4, msg4, export_strings = sensor.export(num_strings)
+        # if err4:
+        #     print(f"    Error: {msg4}")
+        # else:
+        #     for i, string in enumerate(export_strings):
+        #         print(f"    Export string {i+1}: {string}")
 
+        ########## UNCOMMENT TO IMPORT STRINGS ##########
+        # # Import strings and print
+        # to_import = ['0024FFC683B2','41C3807044C3','010101000080','400000E04000','002041005DE7']
+        # err5, msg5, import_strings = sensor.import_cal_string(to_import)
+        # if err5:
+        #     print(f"    Error: {msg5}")
 
 if __name__ == '__main__':
     main()
